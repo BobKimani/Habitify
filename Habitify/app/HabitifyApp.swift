@@ -13,8 +13,8 @@ struct HabitifyApp: App {
     
     var body: some Scene {
         WindowGroup {
-//            WelcomeView(isActive: $isActive)
-            BottomNavView()
+            WelcomeView(isActive: $isActive)
+//            BottomNavView()
         }
     }
 }
