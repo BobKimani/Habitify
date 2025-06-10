@@ -13,8 +13,9 @@ struct HabitifyApp: App {
     
     var body: some Scene {
         WindowGroup {
-            WelcomeView(isActive: $isActive)
+//            WelcomeView(isActive: $isActive)
 //            BottomNavView()
+            NavContainer()
         }
     }
 }

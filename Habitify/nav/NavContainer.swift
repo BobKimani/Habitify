@@ -1,19 +1,14 @@
 import SwiftUI
 
-struct NavigationContainerView: View {
-    @State private var isActive = false
+struct NavContainer: View {
+    @State private var navigateToSignIn = false
 
     var body: some View {
         NavigationStack {
-            if isActive {
-                SignInView()
-            } else {
-                WelcomeView(isActive: $isActive)
-            }
+            WelcomeView(isActive: $navigateToSignIn)
+                .navigationDestination(isPresented: $navigateToSignIn) {
+                    SignInView()
+                }
         }
     }
-}
-
-#Preview {
-    NavigationContainerView()
 }
