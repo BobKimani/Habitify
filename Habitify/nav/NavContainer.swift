@@ -1,14 +1,26 @@
 import SwiftUI
 
 struct NavContainer: View {
-    @State private var navigateToSignIn = false
+    @Environment(\.managedObjectContext) private var viewContext
+    @EnvironmentObject var authViewModel: AuthViewModel
+
+    @StateObject private var achievementsViewModel = AchievementsViewModel(
+        context: PersistenceController.shared.container.viewContext
+    )
 
     var body: some View {
-        NavigationStack {
-            WelcomeView(isActive: $navigateToSignIn)
-                .navigationDestination(isPresented: $navigateToSignIn) {
-                    SignInView()
-                }
+        Group {
+            if authViewModel.isAuthenticated {
+                BottomNavView(
+                    authViewModel: authViewModel,
+                    achievementsViewModel: achievementsViewModel
+                )
+                .environment(\.managedObjectContext, viewContext)
+            } else {
+                AuthFlowView()
+                    .environmentObject(authViewModel)
+            }
         }
     }
 }
+

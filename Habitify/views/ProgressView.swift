@@ -1,68 +1,113 @@
-// Views/Progress/ProgressView.swift
+// MARK: - ProgressView.swift
+
 import SwiftUI
+import CoreData
+import Charts
 
 struct ProgressView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @StateObject private var progressViewModel: ProgressViewModel
+    @EnvironmentObject private var authViewModel: AuthViewModel
+
+    init(context: NSManagedObjectContext) {
+        _progressViewModel = StateObject(wrappedValue: ProgressViewModel(context: context))
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    // Header
-                    HStack {
-                        Label("Hi, Alex", systemImage: "person.circle")
-                            .font(.headline)
-                        Spacer()
-                        HStack(spacing: 16) {
-                            Image(systemName: "bell")
-                            Image(systemName: "info.circle")
-                        }
-                        .font(.title3)
-                    }
-                    .padding(.horizontal)
-
-                    // Streaks
-                    StreaksView()
-
-                    // Weekly Completion
-                    SectionCard(title: "Weekly Completion") {
-                        ProgressBarRow(label: "Health", percent: 0.86)
-                        ProgressBarRow(label: "Productivity", percent: 0.65)
-                        ProgressBarRow(label: "Personal", percent: 0.73)
-                    }
-
-                    // Calendar Section
-                    SectionCard(title: "Calendar") {
-                        CalendarView()
-                    }
-
-                    // Monthly Progress
-                    SectionCard(title: "Monthly Progress") {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.gray.opacity(0.1))
-                            .frame(height: 140)
-                            .overlay(
-                                Text("[Monthly Progress Chart]")
-                                    .foregroundColor(.gray)
-                            )
-                    }
-
-                    // Habit Success Rate
-                    SectionCard(title: "Habit Success Rate") {
-                        ProgressBarRow(label: "Morning Exercise", percent: 0.92)
-                        ProgressBarRow(label: "Deep Work", percent: 0.75)
-                        ProgressBarRow(label: "Meditation", percent: 0.69)
-                    }
-
-                    Spacer(minLength: 30)
+                VStack(spacing: 24) {
+                    header
+                    weeklyCompletion
+                    pieChartSection
+                    calendarSection
+                    streakSection
                 }
                 .padding()
             }
             .navigationTitle("Progress")
         }
     }
+
+    private var header: some View {
+        HStack {
+            Label("Hi, \(authViewModel.displayName)", systemImage: "person.circle")
+                .font(.headline)
+
+            Spacer()
+
+            HStack(spacing: 16) {
+                Image(systemName: "bell")
+                Image(systemName: "info.circle")
+            }
+            .font(.title3)
+        }
+    }
+
+    private var weeklyCompletion: some View {
+        SectionCard(title: "Weekly Completion") {
+            if progressViewModel.totalCompletionsThisWeek == 0 {
+                Text("No habits completed this week.")
+                    .foregroundColor(.gray)
+            } else {
+                ForEach(progressViewModel.weeklyStats.sorted(by: { $0.key < $1.key }), id: \ .key) { category, count in
+                    ProgressBarRow(
+                        label: category,
+                        percent: CGFloat(count) / CGFloat(progressViewModel.totalCompletionsThisWeek)
+                    )
+                }
+            }
+        }
+    }
+
+    private var pieChartSection: some View {
+        SectionCard(title: "Category Distribution") {
+            if progressViewModel.categoryDistribution.isEmpty {
+                Text("No data to display")
+                    .foregroundColor(.gray)
+            } else {
+                Chart {
+                    ForEach(progressViewModel.categoryDistribution.sorted(by: { $0.key < $1.key }), id: \ .key) { category, count in
+                        SectorMark(
+                            angle: .value("Count", count),
+                            innerRadius: .ratio(0.5),
+                            angularInset: 1
+                        )
+                        .foregroundStyle(by: .value("Category", category))
+                    }
+                }
+                .frame(height: 200)
+            }
+        }
+    }
+
+    private var calendarSection: some View {
+        SectionCard(title: "Calendar") {
+            CalendarGridView(completionDates: progressViewModel.completionDates)
+        }
+    }
+
+    private var streakSection: some View {
+        SectionCard(title: "Streaks") {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("🔥 Current Streak")
+                    Text("\(progressViewModel.currentStreak) days")
+                        .font(.headline)
+                }
+                Spacer()
+                VStack(alignment: .leading) {
+                    Text("🏆 Best Streak")
+                    Text("\(progressViewModel.bestStreak) days")
+                        .font(.headline)
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
 }
 
 #Preview {
-    NavigationStack {
-        BottomNavView()
-    }
+    ProgressView(context: PersistenceController.preview.container.viewContext)
+        .environmentObject(AuthViewModel())
 }

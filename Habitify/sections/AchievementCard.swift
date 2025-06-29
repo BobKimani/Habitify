@@ -7,21 +7,18 @@ struct AchievementCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
-                .foregroundColor(unlocked ? .primary : .gray)
+            HStack {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(unlocked ? .primary : .gray)
+                Spacer()
+                Image(systemName: unlocked ? "checkmark.seal.fill" : "lock.fill")
+                    .foregroundColor(unlocked ? .green : .gray)
+            }
 
             Text(description)
                 .font(.subheadline)
                 .foregroundColor(unlocked ? .secondary : .gray)
-
-            if unlocked {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(.green)
-            } else {
-                Image(systemName: "lock.fill")
-                    .foregroundColor(.gray)
-            }
         }
         .padding()
         .frame(maxWidth: .infinity)

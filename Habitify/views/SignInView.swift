@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SignInView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+
     @State private var email = ""
     @State private var password = ""
 
@@ -19,8 +21,14 @@ struct SignInView: View {
             SecureField("Password", text: $password)
                 .textFieldStyle(.roundedBorder)
 
+            if let error = authViewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.subheadline)
+            }
+
             Button(action: {
-                // Sign in logic 
+                authViewModel.signIn(email: email, password: password)
             }) {
                 Text("Sign In")
                     .frame(maxWidth: .infinity)
@@ -46,4 +54,5 @@ struct SignInView: View {
 
 #Preview {
     SignInView()
+        .environmentObject(AuthViewModel())
 }

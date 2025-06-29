@@ -1,50 +1,64 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Avatar
-                    VStack(spacing: 8) {
-                        Image(systemName: "person.crop.circle.fill")
-                            .resizable()
-                            .frame(width: 100, height: 100)
-                            .foregroundColor(.purple)
+        ScrollView {
+            VStack(spacing: 20) {
+                // Avatar and user info
+                VStack(spacing: 8) {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                        .foregroundColor(.purple)
 
-                        Text("Alex Kimani")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                    Text(authViewModel.user?.email?.components(separatedBy: "@").first?.capitalized ?? "User")
+                        .font(.title2)
+                        .fontWeight(.semibold)
 
-                        Text("alexkimani@email.com")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.top)
+                    Text(authViewModel.user?.email ?? "")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                .padding(.top)
 
-                    Divider()
+                Divider()
 
-                    // Preferences / Settings
-                    SectionCard(title: "Settings") {
-                        ProfileRow(icon: "bell", label: "Notifications")
-                        ProfileRow(icon: "lock", label: "Privacy")
+                // Settings Section
+                SectionCard(title: "Settings") {
+                    NavigationLink(destination: AppearanceView()) {
                         ProfileRow(icon: "paintbrush", label: "Appearance")
                     }
+                    ProfileRow(icon: "bell", label: "Notifications")
+                    ProfileRow(icon: "lock", label: "Privacy")
+                }
 
-                    SectionCard(title: "Account") {
+                // Account Section
+                SectionCard(title: "Account") {
+                    NavigationLink(destination: EditProfileView()) {
                         ProfileRow(icon: "person", label: "Edit Profile")
-                        ProfileRow(icon: "arrow.right.square", label: "Logout", isDestructive: true)
                     }
 
-                    Spacer(minLength: 40)
+                    Button {
+                        authViewModel.signOut()
+                    } label: {
+                        ProfileRow(icon: "arrow.right.square", label: "Logout", isDestructive: true)
+                    }
                 }
-                .padding()
+
+                Spacer(minLength: 40)
             }
-            .navigationTitle("Profile")
+            .padding()
         }
+        .navigationTitle("Profile")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 #Preview {
-    ProfileView()
+    NavigationStack {
+        ProfileView()
+            .environmentObject(AuthViewModel())
+    }
 }
