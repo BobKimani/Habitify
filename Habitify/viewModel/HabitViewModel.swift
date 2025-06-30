@@ -52,6 +52,19 @@ class HabitViewModel: ObservableObject {
             }
         }
     }
+    
+    func deleteHabit(_ habit: Habit, onComplete: @escaping () -> Void) {
+        viewContext.delete(habit)
+
+        do {
+            try viewContext.save()
+            onComplete()
+            print("Deleted habit: \(habit.title ?? "Untitled")")
+        } catch {
+            print("Failed to delete habit: \(error.localizedDescription)")
+        }
+    }
+
 
     private func deleteTodayCompletion(for habit: Habit, onSuccess: @escaping () -> Void) {
         let request: NSFetchRequest<HabitCompletion> = HabitCompletion.fetchRequest()
