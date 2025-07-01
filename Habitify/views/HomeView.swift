@@ -6,7 +6,6 @@ struct HomeView: View {
     @StateObject private var achievementVM = AchievementsViewModel(context: PersistenceController.shared.container.viewContext)
     @EnvironmentObject var authViewModel: AuthViewModel
 
-
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Habit.createdAt, ascending: true)],
         predicate: NSPredicate(format: "isArchived == NO"),
@@ -22,7 +21,7 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 16) {
                 header
 
-                // Quote
+                // Date and Quote
                 VStack(alignment: .leading, spacing: 4) {
                     Text(formattedDate())
                         .font(.title2)
@@ -38,7 +37,6 @@ struct HomeView: View {
                 ForEach(groupedHabits.keys.sorted(), id: \.self) { category in
                     HabitView(
                         title: category,
-                        habits: groupedHabits[category] ?? [],
                         onToggle: {
                             refreshToggle.toggle()
                         },
@@ -50,7 +48,7 @@ struct HomeView: View {
             }
             .padding(.top)
         }
-        .navigationTitle("Habitify") // ✅ Will now display
+        .navigationTitle("Habitify")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

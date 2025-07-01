@@ -55,3 +55,4 @@ struct AchievementsView: View {
         .padding(.horizontal)
     }
 }
+
